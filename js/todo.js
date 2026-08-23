@@ -1,8 +1,11 @@
 import { createChecklist } from './storage.js';
 import { scrollToPage } from './pager.js';
 import { iconHome, iconCalendar } from './icons.js';
+import { enableSwipeToDelete } from './swipeToDelete.js';
+import { showToast } from './toast.js';
+import { celebrate } from './celebrate.js';
 import {
-  todayISO, weekdayKey, escapeHtml, formatDisplayDate,
+  todayISO, weekdayKey, escapeHtml, formatDisplayDate, vibrate,
   WEEKDAY_ORDER, WEEKDAY_LABELS_SV,
 } from './util.js';
 
@@ -11,6 +14,7 @@ const checklist = createChecklist('todo');
 let todoContainer = null;
 let advancedOpen = false;
 let selectedDays = [];
+let wasAllDoneToday = false;
 
 const DAY_SHORT = { mon: 'M', tue: 'T', wed: 'O', thu: 'T', fri: 'F', sat: 'L', sun: 'S' };
 
@@ -19,7 +23,9 @@ export function getSummary() {
   if (items.length === 0) return { text: 'Inga punkter än', done: 0, total: 0 };
   const log = checklist.getLog(todayISO());
   const done = items.filter((i) => log[i.id]).length;
-  return { text: `${done}/${items.length} idag`, done, total: items.length };
+  return {
+    text: `${done}/${items.length} idag`, done, total: items.length, fraction: done / items.length,
+  };
 }
 
 // Used by the "Imorgon" preview to list tomorrow's fixed items.
@@ -34,6 +40,19 @@ function itemMetaLabel(item) {
   return parts.join(' · ');
 }
 
+function removeWithUndo(item) {
+  checklist.archiveItem(item.id);
+  vibrate(15);
+  render();
+  showToast(`"${item.name}" borttagen`, {
+    actionLabel: 'Ångra',
+    onAction: () => {
+      checklist.restoreItem(item.id);
+      render();
+    },
+  });
+}
+
 function renderItem(item, { checkable, today, log }) {
   const meta = itemMetaLabel(item);
   const li = document.createElement('li');
@@ -43,7 +62,7 @@ function renderItem(item, { checkable, today, log }) {
     li.innerHTML = `
       <label class="checklist-label">
         <input type="checkbox" ${checked ? 'checked' : ''} data-id="${item.id}" />
-        <span>
+        <span
           <span class="${checked ? 'done' : ''}">${escapeHtml(item.name)}</span>
           ${meta ? `<span class="item-meta">${escapeHtml(meta)}</span>` : ''}
         </span>
@@ -61,14 +80,22 @@ function renderItem(item, { checkable, today, log }) {
       <button type="button" class="remove-btn" data-remove="${item.id}" aria-label="Ta bort ${escapeHtml(item.name)}">×</button>
     `;
   }
-  li.querySelector(`[data-remove]`).addEventListener('click', () => {
-    checklist.archiveItem(item.id);
-    render();
-  });
+  li.querySelector('[data-remove]').addEventListener('click', () => removeWithUndo(item));
+  enableSwipeToDelete(li, () => removeWithUndo(item));
+
   if (checkable) {
     li.querySelector('input[type="checkbox"]').addEventListener('change', () => {
+      vibrate(10);
       checklist.toggle(today, item.id);
+      const items = checklist.getItemsForWeekday(weekdayKey());
+      const newLog = checklist.getLog(today);
+      const allDoneNow = items.length > 0 && items.every((i) => newLog[i.id]);
       render();
+      if (allDoneNow && !wasAllDoneToday) {
+        vibrate([15, 40, 15]);
+        celebrate();
+      }
+      wasAllDoneToday = allDoneNow;
     });
   }
   return li;
@@ -123,6 +150,7 @@ function render() {
 
   container.querySelector('#toggle-advanced-btn').addEventListener('click', () => {
     advancedOpen = !advancedOpen;
+    vibrate(10);
     render();
   });
 
@@ -137,6 +165,7 @@ function render() {
     const time = timeInput && timeInput.value ? timeInput.value : null;
     const days = selectedDays.length > 0 ? [...selectedDays] : null;
     checklist.addItem(name, { days, time });
+    vibrate(10);
     advancedOpen = false;
     selectedDays = [];
     render();
@@ -155,6 +184,7 @@ function renderAdvancedAdd(container) {
   `;
   box.querySelectorAll('[data-chip]').forEach((chip) => {
     chip.addEventListener('click', () => {
+      vibrate(10);
       const day = chip.dataset.chip;
       selectedDays = selectedDays.includes(day) ? selectedDays.filter((d) => d !== day) : [...selectedDays, day];
       renderAdvancedAdd(container);
@@ -164,5 +194,8 @@ function renderAdvancedAdd(container) {
 
 export function mount(container) {
   todoContainer = container;
+  const items = checklist.getItemsForWeekday(weekdayKey());
+  const log = checklist.getLog(todayISO());
+  wasAllDoneToday = items.length > 0 && items.every((i) => log[i.id]);
   render();
 }

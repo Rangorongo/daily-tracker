@@ -73,3 +73,13 @@ export function formatDuration(totalMinutes) {
   const m = totalMinutes % 60;
   return `${h}h ${String(m).padStart(2, '0')}m`;
 }
+
+// Best-effort haptic feedback — silently does nothing on browsers/devices
+// without the Vibration API (iOS Safari, desktop, etc).
+export function vibrate(pattern = 12) {
+  try {
+    navigator.vibrate?.(pattern);
+  } catch {
+    // ignore
+  }
+}

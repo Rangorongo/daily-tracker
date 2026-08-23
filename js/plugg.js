@@ -1,10 +1,12 @@
 import { readJSON, writeJSON } from './storage.js';
 import { scrollToPage } from './pager.js';
 import {
-  todayISO, weekdayKey, formatDisplayDate, formatDuration,
+  todayISO, weekdayKey, formatDisplayDate, formatDuration, vibrate,
   WEEKDAY_ORDER, WEEKDAY_LABELS_SV,
 } from './util.js';
 import { iconHome, iconSettings } from './icons.js';
+import { celebrate } from './celebrate.js';
+import { showToast } from './toast.js';
 
 const SCHEDULE_KEY = 'plugg.schedule'; // weekday -> target minutes
 const SETTINGS_KEY = 'plugg.settings'; // { sessionMinutes }
@@ -18,7 +20,6 @@ let modalEl = null;
 let timerState = 'idle'; // 'idle' | 'running' | 'paused'
 let remainingSeconds = 0;
 let intervalId = null;
-let justCompleted = false;
 
 // ---- Data layer ----
 
@@ -63,7 +64,10 @@ export function getSummary() {
   const studied = getLog(todayISO()).studiedMinutes;
   if (target === 0 && studied === 0) return { text: 'Inget schemalagt' };
   if (target === 0) return { text: `${formatDuration(studied)} idag` };
-  return { text: `${formatDuration(studied)} / ${formatDuration(target)}` };
+  return {
+    text: `${formatDuration(studied)} / ${formatDuration(target)}`,
+    fraction: Math.min(1, studied / target),
+  };
 }
 
 // ---- Timer ----
@@ -80,18 +84,21 @@ function resetTimerToConfigured() {
 
 function startTimer() {
   if (timerState === 'running') return;
-  justCompleted = false;
+  vibrate(12);
   timerState = 'running';
   intervalId = setInterval(() => {
     remainingSeconds -= 1;
     if (remainingSeconds <= 0) {
       clearInterval(intervalId);
       intervalId = null;
-      addCompletedSession(todayISO(), getSettings().sessionMinutes);
+      const sessionMinutes = getSettings().sessionMinutes;
+      addCompletedSession(todayISO(), sessionMinutes);
       timerState = 'idle';
-      justCompleted = true;
       resetTimerToConfigured();
       renderPluggPage();
+      vibrate([15, 40, 15, 40, 25]);
+      celebrate();
+      showToast(`Pass klart! +${sessionMinutes} min plugg idag.`);
       return;
     }
     updateTimerDisplay();
@@ -103,6 +110,7 @@ function pauseTimer() {
   if (intervalId) clearInterval(intervalId);
   intervalId = null;
   timerState = 'paused';
+  vibrate(10);
   renderPluggPage();
 }
 
@@ -110,7 +118,7 @@ function resetTimer() {
   if (intervalId) clearInterval(intervalId);
   intervalId = null;
   timerState = 'idle';
-  justCompleted = false;
+  vibrate(10);
   resetTimerToConfigured();
   renderPluggPage();
 }
@@ -118,6 +126,12 @@ function resetTimer() {
 function updateTimerDisplay() {
   const clockEl = pluggContainer?.querySelector('#timer-clock');
   if (clockEl) clockEl.textContent = formatClock(remainingSeconds);
+  const ringEl = pluggContainer?.querySelector('.timer-ring');
+  if (ringEl) {
+    const total = getSettings().sessionMinutes * 60;
+    const progress = total > 0 ? 1 - remainingSeconds / total : 0;
+    ringEl.style.setProperty('--progress', progress);
+  }
 }
 
 // ---- Render ----
@@ -128,6 +142,8 @@ function renderPluggPage() {
   const target = getTodayTargetMinutes();
   const log = getLog(today);
   const sessionMinutes = getSettings().sessionMinutes;
+  const totalSeconds = sessionMinutes * 60;
+  const progress = totalSeconds > 0 ? 1 - remainingSeconds / totalSeconds : 0;
 
   container.innerHTML = `
     <header class="section-header" style="--accent: var(--color-plugg)">
@@ -147,11 +163,12 @@ function renderPluggPage() {
     ${target > 0 ? `<div class="progress-bar"><div class="progress-bar-fill" style="width:${Math.min(100, (log.studiedMinutes / target) * 100)}%"></div></div>` : ''}
 
     <div class="session-center timer-center">
-      <div class="timer-ring ${timerState}">
-        <span id="timer-clock" class="timer-clock">${formatClock(remainingSeconds)}</span>
+      <div class="timer-ring ${timerState}" style="--progress:${progress}">
+        <div class="timer-ring-inner">
+          <span id="timer-clock" class="timer-clock">${formatClock(remainingSeconds)}</span>
+        </div>
       </div>
     </div>
-    ${justCompleted ? '<p class="pass-complete">🎉 Pass klart! Bra jobbat.</p>' : ''}
     <p class="timer-session-label">${sessionMinutes} min per pass</p>
 
     <div class="timer-controls">

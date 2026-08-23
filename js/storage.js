@@ -40,6 +40,12 @@ export function createChecklist(namespace) {
       if (item) item.archived = true;
       writeJSON(itemsKey, items);
     },
+    restoreItem(id) {
+      const items = readJSON(itemsKey, []);
+      const item = items.find((i) => i.id === id);
+      if (item) item.archived = false;
+      writeJSON(itemsKey, items);
+    },
     getLog(date) {
       return readJSON(logsKey, {})[date] || {};
     },

@@ -1,10 +1,11 @@
 import { readJSON, writeJSON } from './storage.js';
 import { scrollToPage } from './pager.js';
 import {
-  todayISO, weekdayKey, uid, escapeHtml, formatDisplayDate,
+  todayISO, weekdayKey, uid, escapeHtml, formatDisplayDate, vibrate,
   WEEKDAY_ORDER, WEEKDAY_LABELS_SV,
 } from './util.js';
 import { iconHome, iconSettings } from './icons.js';
+import { celebrate } from './celebrate.js';
 
 const DAYS_KEY = 'gym.days';
 const LOGS_KEY = 'gym.logs';
@@ -13,6 +14,7 @@ let gymContainer = null;
 let currentExerciseIndex = 0;
 let modalEl = null;
 let modalView = 'list'; // 'list' | a WEEKDAY_ORDER key
+let wasPassDoneToday = false;
 
 // ---- Data layer ----
 
@@ -119,7 +121,9 @@ export function getSummary() {
     : 0;
   const target = day.exercises.reduce((sum, ex) => sum + ex.targetSets, 0);
   const label = day.label ? `${day.label} · ` : '';
-  return { text: `${label}${completed}/${target} set` };
+  return {
+    text: `${label}${completed}/${target} set`, fraction: target > 0 ? completed / target : 0,
+  };
 }
 
 // ---- Session view (today) ----
@@ -223,26 +227,34 @@ function renderSession() {
   const logBtn = body.querySelector('#log-set-btn');
   if (!isLastSet) {
     logBtn.addEventListener('click', () => {
+      vibrate(15);
       const weightVal = Number(body.querySelector('#weight-input').value) || 0;
       logSet(today, exercise.id, weightVal);
       const updated = getLogForDate(today).exerciseSets[exercise.id] || [];
       if (updated.length >= target && currentExerciseIndex < day.exercises.length - 1) {
         currentExerciseIndex += 1;
       }
+      const nowAllDone = day.exercises.every((ex) => (getLogForDate(today).exerciseSets[ex.id] || []).length >= ex.targetSets);
       renderSession();
+      if (nowAllDone && !wasPassDoneToday) {
+        vibrate([15, 40, 15, 40, 25]);
+        celebrate();
+      }
+      wasPassDoneToday = nowAllDone;
     });
   }
 
   body.querySelectorAll('[data-goto-ex]').forEach((dot) => {
     dot.addEventListener('click', () => {
+      vibrate(8);
       currentExerciseIndex = Number(dot.dataset.gotoEx);
       renderSession();
     });
   });
   const prevBtn = body.querySelector('#prev-ex-btn');
   const nextBtn = body.querySelector('#next-ex-btn');
-  if (!prevBtn.disabled) prevBtn.addEventListener('click', () => { currentExerciseIndex -= 1; renderSession(); });
-  if (!nextBtn.disabled) nextBtn.addEventListener('click', () => { currentExerciseIndex += 1; renderSession(); });
+  if (!prevBtn.disabled) prevBtn.addEventListener('click', () => { vibrate(8); currentExerciseIndex -= 1; renderSession(); });
+  if (!nextBtn.disabled) nextBtn.addEventListener('click', () => { vibrate(8); currentExerciseIndex += 1; renderSession(); });
 }
 
 function resumeIndexForDay(day, log) {
@@ -257,8 +269,10 @@ export function mount(container) {
   if (day.exercises.length > 0) {
     const log = ensureLogForDate(todayISO());
     currentExerciseIndex = resumeIndexForDay(day, log);
+    wasPassDoneToday = day.exercises.every((ex) => (log.exerciseSets[ex.id] || []).length >= ex.targetSets);
   } else {
     currentExerciseIndex = 0;
+    wasPassDoneToday = false;
   }
   renderSession();
 }
@@ -317,6 +331,7 @@ function renderDayListView() {
   modalEl.querySelector('.close-btn').addEventListener('click', closeSettingsModal);
   modalEl.querySelectorAll('[data-day]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      vibrate(8);
       modalView = btn.dataset.day;
       renderSettingsModal();
     });
@@ -374,6 +389,7 @@ function renderDayEditorView(dayKey) {
 
   list.querySelectorAll('[data-move]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      vibrate(8);
       const [exerciseId, direction] = btn.dataset.move.split(':');
       moveExercise(dayKey, exerciseId, Number(direction));
       renderSettingsModal();
@@ -381,6 +397,7 @@ function renderDayEditorView(dayKey) {
   });
   list.querySelectorAll('[data-remove-ex]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      vibrate(15);
       removeExercise(dayKey, btn.dataset.removeEx);
       renderSettingsModal();
     });

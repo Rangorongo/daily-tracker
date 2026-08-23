@@ -1,5 +1,5 @@
 import {
-  todayISO, addDays, weekdayKeyForISODate, formatDisplayDate, WEEKDAY_LABELS_SV,
+  todayISO, addDays, weekdayKeyForISODate, formatDisplayDate, WEEKDAY_LABELS_SV, vibrate,
 } from './util.js';
 import { scrollToPage } from './pager.js';
 import {
@@ -26,13 +26,20 @@ const CARDS = [
 ];
 
 export function mount(container) {
-  const cardsHtml = CARDS.map((card) => `
-    <button type="button" class="dashboard-card" data-goto="${card.page}" style="--accent: var(${card.colorVar})">
-      <span class="card-icon">${card.icon}</span>
-      <h2>${card.title}</h2>
-      <p>${card.getSummary().text}</p>
-    </button>
-  `).join('');
+  const cardsHtml = CARDS.map((card) => {
+    const summary = card.getSummary();
+    const bar = typeof summary.fraction === 'number'
+      ? `<div class="card-progress"><div class="card-progress-fill" style="width:${Math.round(summary.fraction * 100)}%"></div></div>`
+      : '';
+    return `
+      <button type="button" class="dashboard-card" data-goto="${card.page}" style="--accent: var(${card.colorVar})">
+        <span class="card-icon">${card.icon}</span>
+        <h2>${card.title}</h2>
+        <p>${summary.text}</p>
+        ${bar}
+      </button>
+    `;
+  }).join('');
 
   container.innerHTML = `
     <header class="home-header">
@@ -43,7 +50,10 @@ export function mount(container) {
   `;
 
   container.querySelectorAll('[data-goto]').forEach((btn) => {
-    btn.addEventListener('click', () => scrollToPage(btn.dataset.goto));
+    btn.addEventListener('click', () => {
+      vibrate(8);
+      scrollToPage(btn.dataset.goto);
+    });
   });
 }
 

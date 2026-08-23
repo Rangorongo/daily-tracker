@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daglig-tracker-v7';
+const CACHE_NAME = 'daglig-tracker-v8';
 
 const APP_SHELL = [
   './',
@@ -9,6 +9,9 @@ const APP_SHELL = [
   './js/storage.js',
   './js/pager.js',
   './js/icons.js',
+  './js/toast.js',
+  './js/celebrate.js',
+  './js/swipeToDelete.js',
   './js/dashboard.js',
   './js/todo.js',
   './js/plugg.js',

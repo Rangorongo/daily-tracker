@@ -2,8 +2,9 @@ import { readJSON, writeJSON } from './storage.js';
 import { scrollToPage } from './pager.js';
 import { iconHome, iconSettings } from './icons.js';
 import {
-  todayISO, formatDisplayDate, minutesSinceMidnight, formatDuration, nowMinutes,
+  todayISO, formatDisplayDate, minutesSinceMidnight, formatDuration, nowMinutes, vibrate,
 } from './util.js';
+import { celebrate } from './celebrate.js';
 
 const LOGS_KEY = 'sleep.logs';
 const TARGET_KEY = 'sleep.target'; // { bedtime, wake } — the planned/chosen schedule
@@ -121,8 +122,11 @@ function render() {
     const bedtime = container.querySelector('#bedtime-input').value;
     const wake = container.querySelector('#wake-input').value;
     if (!bedtime || !wake) return;
+    const isNew = !existing;
     saveLog(today, { bedtime, wake });
+    vibrate(12);
     render();
+    if (isNew) celebrate();
   });
 
   const historyEl = container.querySelector('#sleep-history');

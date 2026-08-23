@@ -89,7 +89,11 @@ export async function mount(container) {
         <p class="section-date">Stockholm · ${formatDisplayDate(today)}</p>
       </div>
     </header>
-    <div id="prayer-body"><p class="empty-state">Hämtar böntider…</p></div>
+    <div id="prayer-body">
+      <div class="skeleton-list">
+        ${Array.from({ length: 6 }, () => '<div class="skeleton-row"></div>').join('')}
+      </div>
+    </div>
   `;
 
   container.querySelector('.home-btn').addEventListener('click', () => scrollToPage('home'));
