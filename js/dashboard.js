@@ -1,11 +1,20 @@
-import { todayISO, formatDisplayDate } from './util.js';
+import {
+  todayISO, addDays, weekdayKeyForISODate, formatDisplayDate, WEEKDAY_LABELS_SV,
+} from './util.js';
 import { scrollToPage } from './pager.js';
-import { iconGym, iconPlugg, iconTodo, iconSleep, iconPrayer } from './icons.js';
+import {
+  iconGym, iconPlugg, iconTodo, iconSleep, iconPrayer, iconTomorrow,
+} from './icons.js';
 import * as todo from './todo.js';
 import * as plugg from './plugg.js';
 import * as gym from './gym.js';
 import * as sleep from './sleep.js';
 import * as prayer from './prayer.js';
+
+function tomorrowSummary() {
+  const dayKey = weekdayKeyForISODate(addDays(todayISO(), 1));
+  return { text: WEEKDAY_LABELS_SV[dayKey] };
+}
 
 const CARDS = [
   { page: 'gym', title: 'Gym', colorVar: '--color-gym', icon: iconGym, getSummary: gym.getSummary },
@@ -13,6 +22,7 @@ const CARDS = [
   { page: 'todo', title: 'To-Do', colorVar: '--color-todo', icon: iconTodo, getSummary: todo.getSummary },
   { page: 'sovtider', title: 'Sovtider', colorVar: '--color-sleep', icon: iconSleep, getSummary: sleep.getSummary },
   { page: 'bontider', title: 'Böntider', colorVar: '--color-prayer', icon: iconPrayer, getSummary: prayer.getSummary },
+  { page: 'imorgon', title: 'Imorgon', colorVar: '--color-primary', icon: iconTomorrow, getSummary: tomorrowSummary },
 ];
 
 export function mount(container) {

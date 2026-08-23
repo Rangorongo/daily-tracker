@@ -31,6 +31,11 @@ function getDay(dayKey) {
   return getDays()[dayKey];
 }
 
+// Used by the "Imorgon" preview to show tomorrow's planned exercises.
+export function getDayInfo(dayKey) {
+  return getDay(dayKey);
+}
+
 function getAllLogs() {
   return readJSON(LOGS_KEY, {});
 }

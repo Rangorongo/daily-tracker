@@ -53,6 +53,11 @@ function getTodayTargetMinutes() {
   return getSchedule()[weekdayKey()] || 0;
 }
 
+// Used by the "Imorgon" preview to show tomorrow's target study time.
+export function getTargetMinutesForDay(dayKey) {
+  return getSchedule()[dayKey] || 0;
+}
+
 export function getSummary() {
   const target = getTodayTargetMinutes();
   const studied = getLog(todayISO()).studiedMinutes;

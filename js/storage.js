@@ -13,8 +13,9 @@ export function writeJSON(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-// Shared "checklist" data module, reused by both the To-Do and Plugg
-// sections since they need identical CRUD + daily check-off behavior.
+// Shared "checklist" data module (used by the To-Do section). An item
+// with no `days` shows every day; one with `days` set (e.g. ['sat']) only
+// recurs on those weekdays — used for fixed/recurring commitments.
 export function createChecklist(namespace) {
   const itemsKey = `${namespace}.items`;
   const logsKey = `${namespace}.logs`;
@@ -23,9 +24,14 @@ export function createChecklist(namespace) {
     getItems() {
       return readJSON(itemsKey, []).filter((item) => !item.archived);
     },
-    addItem(name) {
+    getItemsForWeekday(weekdayKey) {
+      return this.getItems().filter((item) => !item.days || item.days.includes(weekdayKey));
+    },
+    addItem(name, { days = null, time = null } = {}) {
       const items = readJSON(itemsKey, []);
-      items.push({ id: uid(), name, createdAt: todayISO(), archived: false });
+      items.push({
+        id: uid(), name, createdAt: todayISO(), archived: false, days, time,
+      });
       writeJSON(itemsKey, items);
     },
     archiveItem(id) {

@@ -33,6 +33,15 @@ export function addDays(isoDate, delta) {
   return toISODate(d);
 }
 
+export function weekdayKeyForISODate(isoDate) {
+  return weekdayKey(new Date(`${isoDate}T00:00:00`));
+}
+
+export function nowMinutes() {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
+}
+
 export function uid() {
   return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 }

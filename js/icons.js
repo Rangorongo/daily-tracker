@@ -30,6 +30,21 @@ export const iconPrayer = wrap(`
   <path d="M18.5 6.2l.5 1.1 1.1.5-1.1.5-.5 1.1-.5-1.1-1.1-.5 1.1-.5z" fill="currentColor" stroke="none" />
 `);
 
+export const iconTomorrow = wrap(`
+  <path d="M12 3v3.5" /><path d="M4.2 10.5A7.8 7.8 0 0 1 12 4a7.8 7.8 0 0 1 7.8 6.5" />
+  <path d="M2.5 10.5h19" /><path d="M4.5 14l3-3 3 3 3.5-3.5 3.5 3.5" />
+  <path d="M4.5 18h15" />
+`);
+
+export const iconClock = wrap(`
+  <circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" />
+`);
+
+export const iconCalendar = wrap(`
+  <rect x="3.5" y="5" width="17" height="15" rx="3" />
+  <path d="M3.5 9.5h17" /><path d="M8 3v4" /><path d="M16 3v4" />
+`);
+
 export const iconHome = wrap(`
   <path d="M4 11.5 12 4l8 7.5" /><path d="M6 10v9h12v-9" />
 `);

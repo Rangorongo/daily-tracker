@@ -1,13 +1,13 @@
-export const PAGE_ORDER = ['home', 'gym', 'plugg', 'todo', 'sovtider', 'bontider'];
+export const PAGE_ORDER = ['home', 'gym', 'plugg', 'todo', 'sovtider', 'bontider', 'imorgon'];
 
 let dotsEl;
 let pagerEl;
 let currentPage = 'home';
 const listeners = [];
 
-export function scrollToPage(key) {
+export function scrollToPage(key, { instant = false } = {}) {
   const el = document.querySelector(`.page[data-page="${key}"]`);
-  if (el) el.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+  if (el) el.scrollIntoView({ behavior: instant ? 'instant' : 'smooth', inline: 'start', block: 'nearest' });
 }
 
 // Called whenever the active page changes, e.g. so the dashboard can
