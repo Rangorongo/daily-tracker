@@ -2,7 +2,7 @@ import { readJSON, writeJSON } from './storage.js';
 import { scrollToPage } from './pager.js';
 import {
   todayISO, weekdayKey, uid, escapeHtml, formatDisplayDate, vibrate,
-  WEEKDAY_ORDER, WEEKDAY_LABELS_SV,
+  WEEKDAY_ORDER, WEEKDAY_LABELS,
 } from './util.js';
 import { iconHome, iconSettings } from './icons.js';
 import { celebrate } from './celebrate.js';
@@ -33,7 +33,7 @@ function getDay(dayKey) {
   return getDays()[dayKey];
 }
 
-// Used by the "Imorgon" preview to show tomorrow's planned exercises.
+// Used by the "Tomorrow" preview to show tomorrow's planned exercises.
 export function getDayInfo(dayKey) {
   return getDay(dayKey);
 }
@@ -114,7 +114,7 @@ function getExerciseHistory(exerciseId, limit = 4) {
 
 export function getSummary() {
   const day = getTodayDay();
-  if (day.exercises.length === 0) return { text: 'Vilodag' };
+  if (day.exercises.length === 0) return { text: 'Rest day' };
   const log = getLogForDate(todayISO());
   const completed = log
     ? Object.values(log.exerciseSets).reduce((sum, sets) => sum + sets.length, 0)
@@ -122,7 +122,7 @@ export function getSummary() {
   const target = day.exercises.reduce((sum, ex) => sum + ex.targetSets, 0);
   const label = day.label ? `${day.label} · ` : '';
   return {
-    text: `${label}${completed}/${target} set`, fraction: target > 0 ? completed / target : 0,
+    text: `${label}${completed}/${target} sets`, fraction: target > 0 ? completed / target : 0,
   };
 }
 
@@ -135,12 +135,12 @@ function renderSession() {
 
   container.innerHTML = `
     <header class="section-header">
-      <button type="button" class="home-btn" aria-label="Till hem">${iconHome}</button>
+      <button type="button" class="home-btn" aria-label="Home">${iconHome}</button>
       <div>
         <h1>Gym</h1>
         <p class="section-date">${formatDisplayDate(today)}${day.label ? ` · ${escapeHtml(day.label)}` : ''}</p>
       </div>
-      <button type="button" class="settings-link" aria-label="Gym-inställningar">${iconSettings}</button>
+      <button type="button" class="settings-link" aria-label="Gym settings">${iconSettings}</button>
     </header>
     <div id="gym-body"></div>
   `;
@@ -151,8 +151,8 @@ function renderSession() {
 
   if (day.exercises.length === 0) {
     body.innerHTML = `
-      <p class="empty-state">Inget schemalagt för idag. Vilodag — eller öppna
-      <button type="button" class="link-btn" id="open-settings-link">inställningar</button> och skriv in vad du kör.</p>
+      <p class="empty-state">Nothing set for today. Rest day — or open
+      <button type="button" class="link-btn" id="open-settings-link">settings</button> to add a plan.</p>
     `;
     body.querySelector('#open-settings-link').addEventListener('click', () => openSettingsModal());
     return;
@@ -185,26 +185,26 @@ function renderSession() {
   if (completedSets.length > 0 && lastWeight != null) {
     const diff = completedSets[completedSets.length - 1].weight - lastWeight;
     const arrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
-    comparisonHtml = `<p class="weight-compare ${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}">${arrow} ${diff > 0 ? '+' : ''}${diff}kg sedan förra passet (${lastWeight}kg)</p>`;
+    comparisonHtml = `<p class="weight-compare ${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}">${arrow} ${diff > 0 ? '+' : ''}${diff}kg vs last time (${lastWeight}kg)</p>`;
   } else if (lastWeight != null) {
-    comparisonHtml = `<p class="weight-compare">Förra passet: ${lastWeight}kg</p>`;
+    comparisonHtml = `<p class="weight-compare">Last time: ${lastWeight}kg</p>`;
   }
 
   const trendHtml = history.length
-    ? `<p class="weight-trend">Historik: ${history.slice().reverse().map((h) => `${h.weight}kg`).join(' → ')}</p>`
+    ? `<p class="weight-trend">History: ${history.slice().reverse().map((h) => `${h.weight}kg`).join(' → ')}</p>`
     : '';
 
   const isLastSet = completedSets.length >= target;
 
   body.innerHTML = `
     <div class="exercise-dots">${exerciseDots}</div>
-    <p class="exercise-progress">Övning ${currentExerciseIndex + 1} av ${day.exercises.length}</p>
+    <p class="exercise-progress">Exercise ${currentExerciseIndex + 1} of ${day.exercises.length}</p>
     <h2 class="exercise-name-big">${escapeHtml(exercise.name)}</h2>
     <div class="set-dots-row">${setDots}</div>
-    <p class="set-progress">Set ${Math.min(completedSets.length + 1, target)} av ${target}</p>
+    <p class="set-progress">Set ${Math.min(completedSets.length + 1, target)} of ${target}</p>
 
     <div class="weight-input-row">
-      <label for="weight-input">Vikt</label>
+      <label for="weight-input">Weight</label>
       <input type="number" id="weight-input" inputmode="decimal" step="0.5" min="0" value="${defaultWeight}" />
       <span>kg</span>
     </div>
@@ -213,15 +213,15 @@ function renderSession() {
 
     <div class="session-center">
       <button type="button" id="log-set-btn" class="log-set-btn" ${isLastSet ? 'disabled' : ''}>
-        ${isLastSet ? 'Klar ✓' : 'Set klart'}
+        ${isLastSet ? 'Done ✓' : 'Log set'}
       </button>
     </div>
 
     <div class="session-nav">
-      <button type="button" id="prev-ex-btn" ${currentExerciseIndex === 0 ? 'disabled' : ''}>◀ Föregående</button>
-      <button type="button" id="next-ex-btn" ${currentExerciseIndex === day.exercises.length - 1 ? 'disabled' : ''}>Nästa ▶</button>
+      <button type="button" id="prev-ex-btn" ${currentExerciseIndex === 0 ? 'disabled' : ''}>◀ Prev</button>
+      <button type="button" id="next-ex-btn" ${currentExerciseIndex === day.exercises.length - 1 ? 'disabled' : ''}>Next ▶</button>
     </div>
-    ${allDone ? '<p class="pass-complete">🎉 Passet klart!</p>' : ''}
+    ${allDone ? '<p class="pass-complete">🎉 Workout done!</p>' : ''}
   `;
 
   const logBtn = body.querySelector('#log-set-btn');
@@ -308,11 +308,11 @@ function renderDayListView() {
   const rows = WEEKDAY_ORDER.map((day) => {
     const info = days[day];
     const summary = info.exercises.length === 0
-      ? 'Vilodag'
-      : `${info.label ? `${escapeHtml(info.label)} · ` : ''}${info.exercises.length} övning${info.exercises.length === 1 ? '' : 'ar'}`;
+      ? 'Rest day'
+      : `${info.label ? `${escapeHtml(info.label)} · ` : ''}${info.exercises.length} exercise${info.exercises.length === 1 ? '' : 's'}`;
     return `
       <button type="button" class="day-row" data-day="${day}">
-        <span class="day-row-name">${WEEKDAY_LABELS_SV[day]}</span>
+        <span class="day-row-name">${WEEKDAY_LABELS[day]}</span>
         <span class="day-row-summary">${summary}</span>
       </button>
     `;
@@ -321,10 +321,10 @@ function renderDayListView() {
   modalEl.innerHTML = `
     <div class="modal-sheet">
       <header class="modal-header">
-        <h2>Gym-inställningar</h2>
-        <button type="button" class="close-btn" aria-label="Stäng">×</button>
+        <h2>Gym settings</h2>
+        <button type="button" class="close-btn" aria-label="Close">×</button>
       </header>
-      <p class="modal-hint">Välj en dag och skriv in vad du kör. Det sparas permanent — samma pass gäller varje vecka tills du ändrar det.</p>
+      <p class="modal-hint">Pick a day and add your exercises. Saved for good — same plan every week until you change it.</p>
       <div class="day-list">${rows}</div>
     </div>
   `;
@@ -344,19 +344,19 @@ function renderDayEditorView(dayKey) {
   modalEl.innerHTML = `
     <div class="modal-sheet">
       <header class="modal-header">
-        <button type="button" class="back-btn" aria-label="Tillbaka till dagar">←</button>
-        <h2>${WEEKDAY_LABELS_SV[dayKey]}</h2>
-        <button type="button" class="close-btn" aria-label="Stäng">×</button>
+        <button type="button" class="back-btn" aria-label="Back to days">←</button>
+        <h2>${WEEKDAY_LABELS[dayKey]}</h2>
+        <button type="button" class="close-btn" aria-label="Close">×</button>
       </header>
       <label class="day-label-field">
-        Namn på passet (valfritt)
-        <input type="text" id="day-label-input" placeholder="t.ex. Ben" maxlength="30" value="${escapeHtml(day.label)}" />
+        Workout name (optional)
+        <input type="text" id="day-label-input" placeholder="e.g. Legs" maxlength="30" value="${escapeHtml(day.label)}" />
       </label>
       <ul class="exercise-edit-list" id="exercise-edit-list"></ul>
       <form id="add-exercise-form" class="add-exercise-form">
-        <input type="text" placeholder="Övning" required maxlength="40" class="exercise-name-input" />
-        <input type="number" min="1" max="20" value="4" class="exercise-sets-input" aria-label="Antal set" />
-        <button type="submit">Lägg till</button>
+        <input type="text" placeholder="Exercise" required maxlength="40" class="exercise-name-input" />
+        <input type="number" min="1" max="20" value="4" class="exercise-sets-input" aria-label="Sets" />
+        <button type="submit">Add</button>
       </form>
     </div>
   `;
@@ -373,15 +373,15 @@ function renderDayEditorView(dayKey) {
 
   const list = modalEl.querySelector('#exercise-edit-list');
   if (day.exercises.length === 0) {
-    list.innerHTML = '<li class="empty-state">Inga övningar än — lägg till en nedan.</li>';
+    list.innerHTML = '<li class="empty-state">No exercises yet — add one below.</li>';
   } else {
     list.innerHTML = day.exercises.map((ex, idx) => `
       <li class="exercise-edit-row">
-        <span>${escapeHtml(ex.name)} · ${ex.targetSets} set</span>
+        <span>${escapeHtml(ex.name)} · ${ex.targetSets} sets</span>
         <span class="exercise-edit-actions">
-          <button type="button" class="reorder-btn" data-move="${ex.id}:-1" ${idx === 0 ? 'disabled' : ''} aria-label="Flytta ${escapeHtml(ex.name)} upp">▲</button>
-          <button type="button" class="reorder-btn" data-move="${ex.id}:1" ${idx === day.exercises.length - 1 ? 'disabled' : ''} aria-label="Flytta ${escapeHtml(ex.name)} ner">▼</button>
-          <button type="button" class="remove-btn" data-remove-ex="${ex.id}" aria-label="Ta bort ${escapeHtml(ex.name)}">×</button>
+          <button type="button" class="reorder-btn" data-move="${ex.id}:-1" ${idx === 0 ? 'disabled' : ''} aria-label="Move ${escapeHtml(ex.name)} up">▲</button>
+          <button type="button" class="reorder-btn" data-move="${ex.id}:1" ${idx === day.exercises.length - 1 ? 'disabled' : ''} aria-label="Move ${escapeHtml(ex.name)} down">▼</button>
+          <button type="button" class="remove-btn" data-remove-ex="${ex.id}" aria-label="Delete ${escapeHtml(ex.name)}">×</button>
         </span>
       </li>
     `).join('');

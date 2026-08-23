@@ -10,7 +10,7 @@ const CALC_METHOD = 3; // Muslim World League — common default in Europe
 
 const PRAYER_ORDER = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
 const PRAYER_LABELS = { fajr: 'Fajr', dhuhr: 'Dhuhr', asr: 'Asr', maghrib: 'Maghrib', isha: 'Isha' };
-const DISPLAY_ROWS = [['Fajr', 'fajr'], ['Gryning', 'sunrise'], ['Dhuhr', 'dhuhr'], ['Asr', 'asr'], ['Maghrib', 'maghrib'], ['Isha', 'isha']];
+const DISPLAY_ROWS = [['Fajr', 'fajr'], ['Sunrise', 'sunrise'], ['Dhuhr', 'dhuhr'], ['Asr', 'asr'], ['Maghrib', 'maghrib'], ['Isha', 'isha']];
 
 function isoToAladhanDate(iso) {
   const [y, m, d] = iso.split('-');
@@ -24,7 +24,7 @@ function cleanTime(raw) {
 async function fetchTimings(iso) {
   const url = `https://api.aladhan.com/v1/timings/${isoToAladhanDate(iso)}?latitude=${STOCKHOLM_LAT}&longitude=${STOCKHOLM_LON}&method=${CALC_METHOD}`;
   const res = await fetch(url);
-  if (!res.ok) throw new Error('Nätverksfel');
+  if (!res.ok) throw new Error('Network error');
   const json = await res.json();
   const t = json.data.timings;
   return {
@@ -65,12 +65,12 @@ function nextPrayer(times) {
       return { key, label: PRAYER_LABELS[key], time: times[key] };
     }
   }
-  return { key: 'fajr', label: 'Fajr (imorgon)', time: times.fajr };
+  return { key: 'fajr', label: 'Fajr (tomorrow)', time: times.fajr };
 }
 
 export function getSummary() {
   const cache = getCache();
-  if (!cache || cache.date !== todayISO()) return { text: 'Hämtar…' };
+  if (!cache || cache.date !== todayISO()) return { text: 'Loading…' };
   const next = nextPrayer(cache.times);
   return { text: `${next.label} ${next.time}` };
 }
@@ -83,9 +83,9 @@ export async function mount(container) {
   const today = todayISO();
   container.innerHTML = `
     <header class="section-header">
-      <button type="button" class="home-btn" aria-label="Till hem">${iconHome}</button>
+      <button type="button" class="home-btn" aria-label="Home">${iconHome}</button>
       <div>
-        <h1>Böntider</h1>
+        <h1>Prayer</h1>
         <p class="section-date">Stockholm · ${formatDisplayDate(today)}</p>
       </div>
     </header>
@@ -102,18 +102,18 @@ export async function mount(container) {
   const result = await getTodayTimes();
 
   if (!result.times) {
-    body.innerHTML = '<p class="empty-state">Kunde inte hämta böntider. Kontrollera internetanslutningen.</p>';
+    body.innerHTML = '<p class="empty-state">Couldn\'t load prayer times. Check your connection.</p>';
     return;
   }
 
   const next = nextPrayer(result.times);
   const staleNote = result.stale
-    ? `<p class="stale-note">Visar cachad data${result.staleDate && result.staleDate !== today ? ` från ${formatDisplayDate(result.staleDate)}` : ''} — ingen internetanslutning just nu.</p>`
+    ? `<p class="stale-note">Showing cached data${result.staleDate && result.staleDate !== today ? ` from ${formatDisplayDate(result.staleDate)}` : ''} — no connection right now.</p>`
     : '';
 
   body.innerHTML = `
     ${staleNote}
-    <p class="next-prayer">Nästa: <strong>${next.label} ${next.time}</strong></p>
+    <p class="next-prayer">Next: <strong>${next.label} ${next.time}</strong></p>
     <ul class="prayer-times">
       ${DISPLAY_ROWS.map(([label, key]) => `<li class="${key === next.key ? 'next' : ''}"><span>${label}</span><span>${result.times[key]}</span></li>`).join('')}
     </ul>

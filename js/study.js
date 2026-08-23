@@ -2,19 +2,19 @@ import { readJSON, writeJSON } from './storage.js';
 import { scrollToPage } from './pager.js';
 import {
   todayISO, weekdayKey, formatDisplayDate, formatDuration, vibrate,
-  WEEKDAY_ORDER, WEEKDAY_LABELS_SV,
+  WEEKDAY_ORDER, WEEKDAY_LABELS,
 } from './util.js';
 import { iconHome, iconSettings } from './icons.js';
 import { celebrate } from './celebrate.js';
 import { showToast } from './toast.js';
 
-const SCHEDULE_KEY = 'plugg.schedule'; // weekday -> target minutes
-const SETTINGS_KEY = 'plugg.settings'; // { sessionMinutes }
-const LOGS_KEY = 'plugg.logs'; // date -> { studiedMinutes, sessionsCompleted }
+const SCHEDULE_KEY = 'study.schedule'; // weekday -> target minutes
+const SETTINGS_KEY = 'study.settings'; // { sessionMinutes }
+const LOGS_KEY = 'study.logs'; // date -> { studiedMinutes, sessionsCompleted }
 
 const DEFAULT_SESSION_MINUTES = 25;
 
-let pluggContainer = null;
+let studyContainer = null;
 let modalEl = null;
 
 let timerState = 'idle'; // 'idle' | 'running' | 'paused'
@@ -54,7 +54,7 @@ function getTodayTargetMinutes() {
   return getSchedule()[weekdayKey()] || 0;
 }
 
-// Used by the "Imorgon" preview to show tomorrow's target study time.
+// Used by the "Tomorrow" preview to show tomorrow's target study time.
 export function getTargetMinutesForDay(dayKey) {
   return getSchedule()[dayKey] || 0;
 }
@@ -62,8 +62,8 @@ export function getTargetMinutesForDay(dayKey) {
 export function getSummary() {
   const target = getTodayTargetMinutes();
   const studied = getLog(todayISO()).studiedMinutes;
-  if (target === 0 && studied === 0) return { text: 'Inget schemalagt' };
-  if (target === 0) return { text: `${formatDuration(studied)} idag` };
+  if (target === 0 && studied === 0) return { text: 'No goal set' };
+  if (target === 0) return { text: `${formatDuration(studied)} today` };
   return {
     text: `${formatDuration(studied)} / ${formatDuration(target)}`,
     fraction: Math.min(1, studied / target),
@@ -95,15 +95,15 @@ function startTimer() {
       addCompletedSession(todayISO(), sessionMinutes);
       timerState = 'idle';
       resetTimerToConfigured();
-      renderPluggPage();
+      renderStudyPage();
       vibrate([15, 40, 15, 40, 25]);
       celebrate();
-      showToast(`Pass klart! +${sessionMinutes} min plugg idag.`);
+      showToast(`Session done! +${sessionMinutes} min today.`);
       return;
     }
     updateTimerDisplay();
   }, 1000);
-  renderPluggPage();
+  renderStudyPage();
 }
 
 function pauseTimer() {
@@ -111,7 +111,7 @@ function pauseTimer() {
   intervalId = null;
   timerState = 'paused';
   vibrate(10);
-  renderPluggPage();
+  renderStudyPage();
 }
 
 function resetTimer() {
@@ -120,13 +120,13 @@ function resetTimer() {
   timerState = 'idle';
   vibrate(10);
   resetTimerToConfigured();
-  renderPluggPage();
+  renderStudyPage();
 }
 
 function updateTimerDisplay() {
-  const clockEl = pluggContainer?.querySelector('#timer-clock');
+  const clockEl = studyContainer?.querySelector('#timer-clock');
   if (clockEl) clockEl.textContent = formatClock(remainingSeconds);
-  const ringEl = pluggContainer?.querySelector('.timer-ring');
+  const ringEl = studyContainer?.querySelector('.timer-ring');
   if (ringEl) {
     const total = getSettings().sessionMinutes * 60;
     const progress = total > 0 ? 1 - remainingSeconds / total : 0;
@@ -136,8 +136,8 @@ function updateTimerDisplay() {
 
 // ---- Render ----
 
-function renderPluggPage() {
-  const container = pluggContainer;
+function renderStudyPage() {
+  const container = studyContainer;
   const today = todayISO();
   const target = getTodayTargetMinutes();
   const log = getLog(today);
@@ -147,18 +147,18 @@ function renderPluggPage() {
 
   container.innerHTML = `
     <header class="section-header">
-      <button type="button" class="home-btn" aria-label="Till hem">${iconHome}</button>
+      <button type="button" class="home-btn" aria-label="Home">${iconHome}</button>
       <div>
-        <h1>Plugg</h1>
+        <h1>Study</h1>
         <p class="section-date">${formatDisplayDate(today)}</p>
       </div>
-      <button type="button" class="settings-link" aria-label="Plugg-inställningar">${iconSettings}</button>
+      <button type="button" class="settings-link" aria-label="Study settings">${iconSettings}</button>
     </header>
 
     <p class="study-progress">
       ${target > 0
-        ? `Idag: <strong>${formatDuration(log.studiedMinutes)}</strong> av ${formatDuration(target)}`
-        : `Idag: <strong>${formatDuration(log.studiedMinutes)}</strong> (inget mål satt för idag)`}
+        ? `Today: <strong>${formatDuration(log.studiedMinutes)}</strong> of ${formatDuration(target)}`
+        : `Today: <strong>${formatDuration(log.studiedMinutes)}</strong> (no goal set)`}
     </p>
     ${target > 0 ? `<div class="progress-bar"><div class="progress-bar-fill" style="width:${Math.min(100, (log.studiedMinutes / target) * 100)}%"></div></div>` : ''}
 
@@ -169,14 +169,14 @@ function renderPluggPage() {
         </div>
       </div>
     </div>
-    <p class="timer-session-label">${sessionMinutes} min per pass</p>
+    <p class="timer-session-label">${sessionMinutes} min / session</p>
 
     <div class="timer-controls">
       <button type="button" id="timer-start-btn" class="log-timer-btn" style="${timerState === 'running' ? 'display:none' : ''}">
-        ${timerState === 'paused' ? 'Fortsätt' : 'Starta'}
+        ${timerState === 'paused' ? 'Resume' : 'Start'}
       </button>
-      <button type="button" id="timer-pause-btn" class="log-timer-btn secondary" style="${timerState === 'running' ? '' : 'display:none'}">Paus</button>
-      <button type="button" id="timer-reset-btn" class="link-btn">Återställ</button>
+      <button type="button" id="timer-pause-btn" class="log-timer-btn secondary" style="${timerState === 'running' ? '' : 'display:none'}">Pause</button>
+      <button type="button" id="timer-reset-btn" class="link-btn">Reset</button>
     </div>
   `;
 
@@ -188,9 +188,9 @@ function renderPluggPage() {
 }
 
 export function mount(container) {
-  pluggContainer = container;
+  studyContainer = container;
   if (timerState === 'idle' && remainingSeconds === 0) resetTimerToConfigured();
-  renderPluggPage();
+  renderStudyPage();
 }
 
 // ---- Settings modal ----
@@ -210,7 +210,7 @@ function openSettingsModal() {
 
 function closeSettingsModal() {
   if (modalEl) modalEl.classList.remove('open');
-  if (pluggContainer) renderPluggPage();
+  if (studyContainer) renderStudyPage();
 }
 
 function renderSettingsModal() {
@@ -221,10 +221,10 @@ function renderSettingsModal() {
     const hours = (schedule[day] || 0) / 60;
     return `
       <div class="schedule-row">
-        <label>${WEEKDAY_LABELS_SV[day]}</label>
+        <label>${WEEKDAY_LABELS[day]}</label>
         <div class="hours-input-group">
           <input type="number" min="0" max="16" step="0.5" data-day="${day}" value="${hours || ''}" placeholder="0" />
-          <span>tim</span>
+          <span>hrs</span>
         </div>
       </div>
     `;
@@ -233,20 +233,20 @@ function renderSettingsModal() {
   modalEl.innerHTML = `
     <div class="modal-sheet">
       <header class="modal-header">
-        <h2>Plugg-inställningar</h2>
-        <button type="button" class="close-btn" aria-label="Stäng">×</button>
+        <h2>Study settings</h2>
+        <button type="button" class="close-btn" aria-label="Close">×</button>
       </header>
 
       <section class="settings-block">
-        <h3>Pomodoro-längd</h3>
+        <h3>Session length</h3>
         <div class="hours-input-group">
           <input type="number" min="5" max="120" step="5" id="session-minutes-input" value="${settings.sessionMinutes}" />
-          <span>min per pass</span>
+          <span>min / session</span>
         </div>
       </section>
 
       <section class="settings-block">
-        <h3>Veckoschema (mål per dag)</h3>
+        <h3>Weekly goal</h3>
         <div class="schedule-grid">${scheduleRows}</div>
       </section>
     </div>

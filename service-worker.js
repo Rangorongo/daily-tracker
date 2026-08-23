@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daglig-tracker-v9';
+const CACHE_NAME = 'daily-tracker-v10';
 
 const APP_SHELL = [
   './',
@@ -14,11 +14,11 @@ const APP_SHELL = [
   './js/swipeToDelete.js',
   './js/dashboard.js',
   './js/todo.js',
-  './js/plugg.js',
+  './js/study.js',
   './js/gym.js',
   './js/sleep.js',
   './js/prayer.js',
-  './js/imorgon.js',
+  './js/tomorrow.js',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',

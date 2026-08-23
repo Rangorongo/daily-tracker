@@ -11,7 +11,7 @@ export function enableSwipeToDelete(li, onDelete) {
 
   const backdrop = document.createElement('div');
   backdrop.className = 'swipe-delete-bg';
-  backdrop.textContent = 'Ta bort';
+  backdrop.textContent = 'Delete';
 
   li.appendChild(backdrop);
   li.appendChild(content);

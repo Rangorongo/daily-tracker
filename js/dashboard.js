@@ -1,25 +1,25 @@
 import {
-  todayISO, addDays, weekdayKeyForISODate, formatDisplayDate, WEEKDAY_LABELS_SV, vibrate,
+  todayISO, addDays, weekdayKeyForISODate, formatDisplayDate, WEEKDAY_LABELS, vibrate,
 } from './util.js';
 import { scrollToPage } from './pager.js';
 import * as todo from './todo.js';
-import * as plugg from './plugg.js';
+import * as study from './study.js';
 import * as gym from './gym.js';
 import * as sleep from './sleep.js';
 import * as prayer from './prayer.js';
 
 function tomorrowSummary() {
   const dayKey = weekdayKeyForISODate(addDays(todayISO(), 1));
-  return { text: WEEKDAY_LABELS_SV[dayKey] };
+  return { text: WEEKDAY_LABELS[dayKey] };
 }
 
 const CARDS = [
   { page: 'gym', title: 'Gym', getSummary: gym.getSummary },
-  { page: 'plugg', title: 'Plugg', getSummary: plugg.getSummary },
+  { page: 'study', title: 'Study', getSummary: study.getSummary },
   { page: 'todo', title: 'To-Do', getSummary: todo.getSummary },
-  { page: 'sovtider', title: 'Sovtider', getSummary: sleep.getSummary },
-  { page: 'bontider', title: 'Böntider', getSummary: prayer.getSummary },
-  { page: 'imorgon', title: 'Imorgon', getSummary: tomorrowSummary },
+  { page: 'sleep', title: 'Sleep', getSummary: sleep.getSummary },
+  { page: 'prayer', title: 'Prayer', getSummary: prayer.getSummary },
+  { page: 'tomorrow', title: 'Tomorrow', getSummary: tomorrowSummary },
 ];
 
 export function mount(container) {
@@ -40,7 +40,7 @@ export function mount(container) {
   container.innerHTML = `
     <header class="home-header">
       <p class="section-date">${formatDisplayDate(todayISO())}</p>
-      <h1>Daglig Tracker</h1>
+      <h1>Daily Tracker</h1>
     </header>
     <div class="dashboard-grid">${cardsHtml}</div>
   `;

@@ -1,13 +1,13 @@
 export const WEEKDAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
-export const WEEKDAY_LABELS_SV = {
-  mon: 'Måndag',
-  tue: 'Tisdag',
-  wed: 'Onsdag',
-  thu: 'Torsdag',
-  fri: 'Fredag',
-  sat: 'Lördag',
-  sun: 'Söndag',
+export const WEEKDAY_LABELS = {
+  mon: 'Mon',
+  tue: 'Tue',
+  wed: 'Wed',
+  thu: 'Thu',
+  fri: 'Fri',
+  sat: 'Sat',
+  sun: 'Sun',
 };
 
 export const WEEKDAY_ORDER = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
@@ -46,15 +46,13 @@ export function uid() {
   return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 }
 
-const DISPLAY_WEEKDAYS = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag'];
 const DISPLAY_MONTHS = [
-  'januari', 'februari', 'mars', 'april', 'maj', 'juni',
-  'juli', 'augusti', 'september', 'oktober', 'november', 'december',
+  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 
 export function formatDisplayDate(isoDate) {
   const d = new Date(`${isoDate}T00:00:00`);
-  return `${DISPLAY_WEEKDAYS[d.getDay()]} ${d.getDate()} ${DISPLAY_MONTHS[d.getMonth()]}`;
+  return `${WEEKDAY_LABELS[WEEKDAYS[d.getDay()]]} · ${DISPLAY_MONTHS[d.getMonth()]} ${d.getDate()}`;
 }
 
 export function escapeHtml(str) {

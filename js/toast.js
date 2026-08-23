@@ -1,5 +1,5 @@
 // Small snackbar shown above the bottom nav — used for confirmations and
-// undoable destructive actions (e.g. "Läxhjälp borttagen — Ångra").
+// undoable destructive actions (e.g. "Tutoring deleted — Undo").
 let toastEl = null;
 let hideTimer = null;
 

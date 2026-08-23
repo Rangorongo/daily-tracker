@@ -587,7 +587,7 @@ svg {
   margin-top: var(--space-5);
 }
 
-/* ---- Settings modal (Gym & Plugg) ---- */
+/* ---- Settings modal (Gym & Study) ---- */
 
 .modal-overlay {
   position: fixed;
@@ -820,7 +820,7 @@ svg {
   padding: 0 var(--space-2);
 }
 
-/* ---- Plugg: study progress + Pomodoro timer ---- */
+/* ---- Study: progress + Pomodoro timer ---- */
 
 .study-progress {
   font-size: 15px;
@@ -1010,7 +1010,7 @@ svg {
   font-weight: 700;
 }
 
-/* ---- Imorgon (tomorrow preview) ---- */
+/* ---- Tomorrow preview ---- */
 
 .tomorrow-grid {
   display: grid;

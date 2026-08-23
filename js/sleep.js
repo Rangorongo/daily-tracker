@@ -43,14 +43,14 @@ function computeDurationMinutes(bedtime, wake) {
 
 export function getSummary() {
   const log = getLog(todayISO());
-  if (!log) return { text: 'Ej loggat' };
+  if (!log) return { text: 'Not logged' };
   const minutes = computeDurationMinutes(log.bedtime, log.wake);
   return { text: formatDuration(minutes) };
 }
 
 // True during the window starting EVENING_WINDOW_MINUTES before the
 // target bedtime and ending at the target bedtime — used to surface the
-// "Imorgon" preview automatically when the app is opened in the evening.
+// "Tomorrow" preview automatically when the app is opened in the evening.
 export function isEveningWindow() {
   const { bedtime } = getTarget();
   const bedMin = minutesSinceMidnight(bedtime);
@@ -83,28 +83,28 @@ function render() {
 
   container.innerHTML = `
     <header class="section-header">
-      <button type="button" class="home-btn" aria-label="Till hem">${iconHome}</button>
+      <button type="button" class="home-btn" aria-label="Home">${iconHome}</button>
       <div>
-        <h1>Sovtider</h1>
+        <h1>Sleep</h1>
         <p class="section-date">${formatDisplayDate(today)}</p>
       </div>
-      <button type="button" class="settings-link" aria-label="Sov-inställningar">${iconSettings}</button>
+      <button type="button" class="settings-link" aria-label="Sleep settings">${iconSettings}</button>
     </header>
 
     <form id="sleep-form" class="sleep-form">
       <label>
-        Läggtid
+        Bedtime
         <input type="time" id="bedtime-input" value="${existing?.bedtime || target.bedtime}" required />
       </label>
       <label>
-        Vaknade
+        Woke up
         <input type="time" id="wake-input" value="${existing?.wake || target.wake}" required />
       </label>
-      <button type="submit">Spara</button>
+      <button type="submit">Save</button>
     </form>
     <div id="sleep-result"></div>
 
-    <h2 class="sub-heading">Senaste dagarna</h2>
+    <h2 class="sub-heading">Recent nights</h2>
     <ul class="sleep-history" id="sleep-history"></ul>
   `;
 
@@ -114,7 +114,7 @@ function render() {
   const resultEl = container.querySelector('#sleep-result');
   if (existing) {
     const minutes = computeDurationMinutes(existing.bedtime, existing.wake);
-    resultEl.innerHTML = `<p class="sleep-duration">Sovtid: <strong>${formatDuration(minutes)}</strong></p>`;
+    resultEl.innerHTML = `<p class="sleep-duration">Duration: <strong>${formatDuration(minutes)}</strong></p>`;
   }
 
   container.querySelector('#sleep-form').addEventListener('submit', (e) => {
@@ -132,7 +132,7 @@ function render() {
   const historyEl = container.querySelector('#sleep-history');
   const entries = lastNEntries(7).filter((e) => e.date !== today);
   if (entries.length === 0) {
-    historyEl.innerHTML = '<li class="empty-state">Ingen historik än.</li>';
+    historyEl.innerHTML = '<li class="empty-state">No history yet.</li>';
   } else {
     historyEl.innerHTML = entries.map((entry) => {
       const minutes = computeDurationMinutes(entry.bedtime, entry.wake);
@@ -164,17 +164,17 @@ function renderSettingsModal() {
   modalEl.innerHTML = `
     <div class="modal-sheet">
       <header class="modal-header">
-        <h2>Sov-inställningar</h2>
-        <button type="button" class="close-btn" aria-label="Stäng">×</button>
+        <h2>Sleep settings</h2>
+        <button type="button" class="close-btn" aria-label="Close">×</button>
       </header>
-      <p class="modal-hint">Din planerade läggtid styr när "Imorgon"-vyn dyker upp automatiskt (2 timmar innan).</p>
+      <p class="modal-hint">Your target bedtime controls when "Tomorrow" opens automatically (2 hours before).</p>
       <div class="sleep-form">
         <label>
-          Läggtid (mål)
+          Target bedtime
           <input type="time" id="target-bedtime-input" value="${target.bedtime}" />
         </label>
         <label>
-          Uppstigning (mål)
+          Target wake time
           <input type="time" id="target-wake-input" value="${target.wake}" />
         </label>
       </div>

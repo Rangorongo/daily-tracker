@@ -6,7 +6,7 @@ import { showToast } from './toast.js';
 import { celebrate } from './celebrate.js';
 import {
   todayISO, weekdayKey, escapeHtml, formatDisplayDate, vibrate,
-  WEEKDAY_ORDER, WEEKDAY_LABELS_SV,
+  WEEKDAY_ORDER, WEEKDAY_LABELS,
 } from './util.js';
 
 const checklist = createChecklist('todo');
@@ -16,26 +16,26 @@ let advancedOpen = false;
 let selectedDays = [];
 let wasAllDoneToday = false;
 
-const DAY_SHORT = { mon: 'M', tue: 'T', wed: 'O', thu: 'T', fri: 'F', sat: 'L', sun: 'S' };
+const DAY_SHORT = { mon: 'M', tue: 'T', wed: 'W', thu: 'T', fri: 'F', sat: 'S', sun: 'S' };
 
 export function getSummary() {
   const items = checklist.getItemsForWeekday(weekdayKey());
-  if (items.length === 0) return { text: 'Inga punkter än', done: 0, total: 0 };
+  if (items.length === 0) return { text: 'Nothing yet', done: 0, total: 0 };
   const log = checklist.getLog(todayISO());
   const done = items.filter((i) => log[i.id]).length;
   return {
-    text: `${done}/${items.length} idag`, done, total: items.length, fraction: done / items.length,
+    text: `${done}/${items.length} today`, done, total: items.length, fraction: done / items.length,
   };
 }
 
-// Used by the "Imorgon" preview to list tomorrow's fixed items.
+// Used by the "Tomorrow" preview to list tomorrow's fixed items.
 export function getItemsForWeekday(day) {
   return checklist.getItemsForWeekday(day);
 }
 
 function itemMetaLabel(item) {
   const parts = [];
-  if (item.days) parts.push(item.days.map((d) => WEEKDAY_LABELS_SV[d]).join(', '));
+  if (item.days) parts.push(item.days.map((d) => WEEKDAY_LABELS[d]).join(', '));
   if (item.time) parts.push(item.time);
   return parts.join(' · ');
 }
@@ -44,8 +44,8 @@ function removeWithUndo(item) {
   checklist.archiveItem(item.id);
   vibrate(15);
   render();
-  showToast(`"${item.name}" borttagen`, {
-    actionLabel: 'Ångra',
+  showToast(`"${item.name}" deleted`, {
+    actionLabel: 'Undo',
     onAction: () => {
       checklist.restoreItem(item.id);
       render();
@@ -62,12 +62,12 @@ function renderItem(item, { checkable, today, log }) {
     li.innerHTML = `
       <label class="checklist-label">
         <input type="checkbox" ${checked ? 'checked' : ''} data-id="${item.id}" />
-        <span
+        <span>
           <span class="${checked ? 'done' : ''}">${escapeHtml(item.name)}</span>
           ${meta ? `<span class="item-meta">${escapeHtml(meta)}</span>` : ''}
         </span>
       </label>
-      <button type="button" class="remove-btn" data-remove="${item.id}" aria-label="Ta bort ${escapeHtml(item.name)}">×</button>
+      <button type="button" class="remove-btn" data-remove="${item.id}" aria-label="Delete ${escapeHtml(item.name)}">×</button>
     `;
   } else {
     li.innerHTML = `
@@ -77,7 +77,7 @@ function renderItem(item, { checkable, today, log }) {
           ${meta ? `<span class="item-meta">${escapeHtml(meta)}</span>` : ''}
         </span>
       </span>
-      <button type="button" class="remove-btn" data-remove="${item.id}" aria-label="Ta bort ${escapeHtml(item.name)}">×</button>
+      <button type="button" class="remove-btn" data-remove="${item.id}" aria-label="Delete ${escapeHtml(item.name)}">×</button>
     `;
   }
   li.querySelector('[data-remove]').addEventListener('click', () => removeWithUndo(item));
@@ -114,7 +114,7 @@ function render() {
 
   container.innerHTML = `
     <header class="section-header">
-      <button type="button" class="home-btn" aria-label="Till hem">${iconHome}</button>
+      <button type="button" class="home-btn" aria-label="Home">${iconHome}</button>
       <div>
         <h1>To-Do</h1>
         <p class="section-date">${formatDisplayDate(today)}</p>
@@ -122,14 +122,14 @@ function render() {
     </header>
     <ul class="checklist" id="checklist-items"></ul>
     <form id="add-item-form" class="add-item-form">
-      <input type="text" id="add-item-input" placeholder="Lägg till ny punkt…" required maxlength="60" />
-      <button type="button" id="toggle-advanced-btn" class="schedule-toggle-btn" aria-label="Schemalägg">${iconCalendar}</button>
-      <button type="submit">Lägg till</button>
+      <input type="text" id="add-item-input" placeholder="Add item…" required maxlength="60" />
+      <button type="button" id="toggle-advanced-btn" class="schedule-toggle-btn" aria-label="Schedule">${iconCalendar}</button>
+      <button type="submit">Add</button>
     </form>
     <div id="advanced-add" class="advanced-add" style="${advancedOpen ? '' : 'display:none'}"></div>
 
     ${otherItems.length > 0 ? `
-      <h2 class="sub-heading">Schemalagda (andra dagar)</h2>
+      <h2 class="sub-heading">Other days</h2>
       <ul class="checklist" id="scheduled-items"></ul>
     ` : ''}
   `;
@@ -138,7 +138,7 @@ function render() {
 
   const list = container.querySelector('#checklist-items');
   if (todayItems.length === 0) {
-    list.innerHTML = '<li class="empty-state">Inga punkter för idag — lägg till en nedan.</li>';
+    list.innerHTML = '<li class="empty-state">Nothing today — add one below.</li>';
   } else {
     todayItems.forEach((item) => list.appendChild(renderItem(item, { checkable: true, today, log })));
   }
@@ -178,7 +178,7 @@ function renderAdvancedAdd(container) {
     <button type="button" class="day-chip ${selectedDays.includes(day) ? 'selected' : ''}" data-chip="${day}">${DAY_SHORT[day]}</button>
   `).join('');
   box.innerHTML = `
-    <p class="advanced-hint">Välj dagar (ingen vald = varje dag) och valfri tid:</p>
+    <p class="advanced-hint">Pick days (none = every day) and an optional time:</p>
     <div class="day-chip-row">${dayChips}</div>
     <input type="time" id="advanced-time-input" />
   `;

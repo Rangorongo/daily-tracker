@@ -1,4 +1,4 @@
-export const PAGE_ORDER = ['home', 'gym', 'plugg', 'todo', 'sovtider', 'bontider', 'imorgon'];
+export const PAGE_ORDER = ['home', 'gym', 'study', 'todo', 'sleep', 'prayer', 'tomorrow'];
 
 let dotsEl;
 let pagerEl;
@@ -35,7 +35,7 @@ export function initPager() {
   dotsEl = document.getElementById('page-dots');
   pagerEl = document.getElementById('pager');
 
-  dotsEl.innerHTML = PAGE_ORDER.map((p) => `<button type="button" class="dot" data-dot="${p}" aria-label="Gå till ${p}"></button>`).join('');
+  dotsEl.innerHTML = PAGE_ORDER.map((p) => `<button type="button" class="dot" data-dot="${p}" aria-label="Go to ${p}"></button>`).join('');
   dotsEl.querySelectorAll('.dot').forEach((dot) => {
     dot.addEventListener('click', () => scrollToPage(dot.dataset.dot));
   });
