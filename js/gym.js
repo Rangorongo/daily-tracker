@@ -134,7 +134,7 @@ function renderSession() {
   const day = getTodayDay();
 
   container.innerHTML = `
-    <header class="section-header" style="--accent: var(--color-gym)">
+    <header class="section-header">
       <button type="button" class="home-btn" aria-label="Till hem">${iconHome}</button>
       <div>
         <h1>Gym</h1>

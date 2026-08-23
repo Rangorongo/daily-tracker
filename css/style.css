@@ -1,22 +1,14 @@
 :root {
-  --color-primary: #0D9488;
-  --color-primary-on: #FFFFFF;
-  --color-accent: #EA580C;
-  --color-bg: #F4F7F8;
-  --color-fg: #10201E;
+  --color-bg: #FFFFFF;
+  --color-fg: #0F1419;
   --color-card: #FFFFFF;
-  --color-card-fg: #10201E;
-  --color-muted: #EEF2F3;
-  --color-muted-fg: #5B6B70;
-  --color-border: #E1E8EA;
-  --color-danger: #DC2626;
-  --color-success: #16A34A;
-
-  --color-gym: #F97316;
-  --color-plugg: #2563EB;
-  --color-todo: #16A34A;
-  --color-sleep: #7C3AED;
-  --color-prayer: #059669;
+  --color-card-fg: #0F1419;
+  --color-muted: #F7F8F8;
+  --color-muted-fg: #536471;
+  --color-border: #EFF3F4;
+  --color-danger: #F4212E;
+  --color-primary: #0F1419;
+  --color-primary-on: #FFFFFF;
 
   --radius: 18px;
   --radius-sm: 12px;
@@ -29,26 +21,29 @@
   --space-7: 48px;
   --transition: 180ms ease;
   --dots-bar-height: 40px;
-  --shadow-card: 0 1px 2px rgba(16, 32, 30, 0.04), 0 6px 16px rgba(16, 32, 30, 0.06);
-  --shadow-sheet: 0 -8px 30px rgba(16, 32, 30, 0.18);
+  --shadow-card: 0 1px 2px rgba(15, 20, 25, 0.04), 0 6px 16px rgba(15, 20, 25, 0.06);
+  --shadow-sheet: 0 -8px 30px rgba(15, 20, 25, 0.18);
+  --shadow-cta: 0 8px 20px rgba(15, 20, 25, 0.22);
 
-  --font-heading: 'Lexend', system-ui, sans-serif;
-  --font-body: 'Source Sans 3', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #0B1414;
-    --color-fg: #EDF3F2;
-    --color-card: #142221;
-    --color-card-fg: #EDF3F2;
-    --color-muted: #1B2C2A;
-    --color-muted-fg: #8FA3A0;
-    --color-border: #24403C;
+    --color-bg: #000000;
+    --color-fg: #E7E9EA;
+    --color-card: #000000;
+    --color-card-fg: #E7E9EA;
+    --color-muted: #16181C;
+    --color-muted-fg: #71767B;
+    --color-border: #2F3336;
+    --color-primary: #FFFFFF;
+    --color-primary-on: #000000;
     --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.35);
-    --shadow-sheet: 0 -8px 30px rgba(0, 0, 0, 0.45);
+    --shadow-sheet: 0 -8px 30px rgba(0, 0, 0, 0.5);
+    --shadow-cta: 0 8px 20px rgba(0, 0, 0, 0.5);
     color-scheme: dark;
   }
 }
@@ -67,14 +62,14 @@ body {
   overflow: hidden;
   background: var(--color-bg);
   color: var(--color-fg);
-  font-family: var(--font-body);
+  font-family: var(--font-mono);
   font-size: 16px;
   line-height: 1.5;
 }
 
 h1, h2, h3, h4 {
-  font-family: var(--font-heading);
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-weight: 700;
   margin: 0;
   letter-spacing: -0.01em;
 }
@@ -86,6 +81,7 @@ button {
 
 input, select, button {
   font-size: 16px;
+  font-family: inherit;
 }
 
 svg {
@@ -158,7 +154,7 @@ svg {
 }
 
 .home-header h1 {
-  font-size: 30px;
+  font-size: 28px;
   margin-top: var(--space-1);
 }
 
@@ -186,36 +182,27 @@ svg {
   border-radius: var(--radius);
   padding: var(--space-4);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-card);
-  transition: transform var(--transition), box-shadow var(--transition);
-  min-height: 128px;
+  transition: transform var(--transition), background var(--transition);
+  min-height: 116px;
 }
 
 .dashboard-card:active {
   transform: scale(0.96);
-}
-
-.card-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  color: var(--accent);
+  background: var(--color-muted);
 }
 
 .dashboard-card h2 {
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--color-card-fg);
   margin: 0;
 }
 
 .dashboard-card p {
   margin: 0;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-muted-fg);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---- Section views ---- */
@@ -228,8 +215,7 @@ svg {
 }
 
 .section-header h1 {
-  font-size: 22px;
-  color: var(--accent);
+  font-size: 20px;
 }
 
 .home-btn, .settings-link, .back-btn, .close-btn {
@@ -244,12 +230,12 @@ svg {
   color: var(--color-fg);
   font-size: 20px;
   flex-shrink: 0;
-  box-shadow: var(--shadow-card);
-  transition: transform var(--transition);
+  transition: transform var(--transition), background var(--transition);
 }
 
 .home-btn:active, .settings-link:active, .back-btn:active, .close-btn:active {
   transform: scale(0.92);
+  background: var(--color-muted);
 }
 
 .settings-link {
@@ -260,7 +246,7 @@ svg {
   background: none;
   border: none;
   padding: 0;
-  color: var(--color-primary);
+  color: var(--color-fg);
   text-decoration: underline;
   font-size: inherit;
 }
@@ -272,7 +258,7 @@ svg {
 }
 
 .sub-heading {
-  font-size: 16px;
+  font-size: 15px;
   margin: var(--space-6) 0 var(--space-3);
 }
 
@@ -296,7 +282,6 @@ svg {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: var(--space-3) var(--space-4);
-  box-shadow: var(--shadow-card);
 }
 
 .checklist-label {
@@ -308,10 +293,15 @@ svg {
 }
 
 .checklist-label input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
-  accent-color: var(--accent);
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-fg);
   flex-shrink: 0;
+  transition: transform 150ms ease;
+}
+
+.checklist-label input[type="checkbox"]:active {
+  transform: scale(0.85);
 }
 
 .checklist-label span.done {
@@ -405,9 +395,9 @@ svg {
 }
 
 .day-chip.selected {
-  background: var(--color-todo);
-  border-color: var(--color-todo);
-  color: #FFFFFF;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-primary-on);
 }
 
 .advanced-add input[type="time"] {
@@ -436,7 +426,7 @@ svg {
 .sleep-form button:active,
 .add-exercise-form button:active {
   transform: scale(0.97);
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
 /* ---- Gym: session view ---- */
@@ -458,12 +448,12 @@ svg {
 }
 
 .ex-dot.done {
-  background: var(--color-gym);
-  border-color: var(--color-gym);
+  background: var(--color-fg);
+  border-color: var(--color-fg);
 }
 
 .ex-dot.current {
-  border-color: var(--color-gym);
+  border-color: var(--color-fg);
   width: 14px;
   height: 14px;
 }
@@ -475,7 +465,7 @@ svg {
 }
 
 .exercise-name-big {
-  font-size: 28px;
+  font-size: 26px;
   margin-bottom: var(--space-4);
 }
 
@@ -494,8 +484,8 @@ svg {
 }
 
 .set-dot.done {
-  background: var(--color-gym);
-  border-color: var(--color-gym);
+  background: var(--color-fg);
+  border-color: var(--color-fg);
 }
 
 .set-progress {
@@ -525,7 +515,7 @@ svg {
   color: var(--color-fg);
   padding: 0 var(--space-3);
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
   text-align: center;
 }
 
@@ -533,14 +523,6 @@ svg {
   font-size: 14px;
   color: var(--color-muted-fg);
   margin: 0 0 var(--space-1);
-}
-
-.weight-compare.up {
-  color: var(--color-success);
-}
-
-.weight-compare.down {
-  color: var(--color-danger);
 }
 
 .weight-trend {
@@ -556,16 +538,16 @@ svg {
 }
 
 .log-set-btn {
-  width: 176px;
-  height: 176px;
+  width: 172px;
+  height: 172px;
   border-radius: 50%;
   border: none;
-  background: var(--color-gym);
-  color: #FFFFFF;
-  font-family: var(--font-heading);
+  background: var(--color-primary);
+  color: var(--color-primary-on);
+  font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 19px;
-  box-shadow: 0 10px 28px color-mix(in srgb, var(--color-gym) 45%, transparent);
+  font-size: 18px;
+  box-shadow: var(--shadow-cta);
   transition: transform var(--transition), opacity var(--transition);
 }
 
@@ -600,7 +582,7 @@ svg {
 
 .pass-complete {
   text-align: center;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   margin-top: var(--space-5);
 }
@@ -610,7 +592,7 @@ svg {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(10, 18, 17, 0.55);
+  background: rgba(15, 20, 25, 0.55);
   display: flex;
   align-items: flex-end;
   z-index: 100;
@@ -633,6 +615,8 @@ svg {
   border-radius: var(--radius) var(--radius) 0 0;
   padding: var(--space-3) var(--space-4) var(--space-7);
   box-shadow: var(--shadow-sheet);
+  border: 1px solid var(--color-border);
+  border-bottom: none;
 }
 
 .modal-sheet::before {
@@ -658,7 +642,7 @@ svg {
 
 .modal-header h2 {
   flex: 1;
-  font-size: 19px;
+  font-size: 18px;
   text-align: center;
 }
 
@@ -674,7 +658,7 @@ svg {
 }
 
 .settings-block h3 {
-  font-size: 17px;
+  font-size: 16px;
   margin-bottom: var(--space-3);
 }
 
@@ -743,7 +727,6 @@ svg {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: var(--space-4);
-  box-shadow: var(--shadow-card);
 }
 
 .day-row-name {
@@ -840,13 +823,13 @@ svg {
 /* ---- Plugg: study progress + Pomodoro timer ---- */
 
 .study-progress {
-  font-size: 16px;
+  font-size: 15px;
   margin: 0 0 var(--space-2);
 }
 
 .progress-bar {
-  height: 8px;
-  border-radius: 4px;
+  height: 6px;
+  border-radius: 3px;
   background: var(--color-muted);
   overflow: hidden;
   margin-bottom: var(--space-6);
@@ -854,8 +837,8 @@ svg {
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--color-plugg);
-  border-radius: 4px;
+  background: var(--color-fg);
+  border-radius: 3px;
   transition: width 300ms ease;
 }
 
@@ -872,7 +855,7 @@ svg {
   align-items: center;
   justify-content: center;
   background: conic-gradient(
-    var(--color-plugg) calc(var(--progress) * 360deg),
+    var(--color-fg) calc(var(--progress) * 360deg),
     var(--color-muted) 0deg
   );
 }
@@ -882,8 +865,8 @@ svg {
 }
 
 @keyframes ring-glow {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-plugg) 25%, transparent); }
-  50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-plugg) 0%, transparent); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-fg) 20%, transparent); }
+  50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-fg) 0%, transparent); }
 }
 
 .timer-ring-inner {
@@ -897,8 +880,8 @@ svg {
 }
 
 .timer-clock {
-  font-family: var(--font-heading);
-  font-size: 40px;
+  font-family: var(--font-mono);
+  font-size: 38px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
@@ -922,11 +905,11 @@ svg {
   min-height: 52px;
   border-radius: 999px;
   border: none;
-  background: var(--color-plugg);
-  color: #FFFFFF;
+  background: var(--color-primary);
+  color: var(--color-primary-on);
   font-weight: 700;
-  font-size: 17px;
-  box-shadow: 0 10px 24px color-mix(in srgb, var(--color-plugg) 40%, transparent);
+  font-size: 16px;
+  box-shadow: var(--shadow-cta);
   transition: transform var(--transition);
 }
 
@@ -992,7 +975,7 @@ svg {
 /* ---- Prayer times ---- */
 
 .next-prayer {
-  font-size: 18px;
+  font-size: 17px;
   margin-bottom: var(--space-4);
 }
 
@@ -1018,13 +1001,13 @@ svg {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: var(--space-3) var(--space-4);
-  box-shadow: var(--shadow-card);
+  font-variant-numeric: tabular-nums;
 }
 
 .prayer-times li.next {
-  border-color: var(--color-prayer);
-  background: color-mix(in srgb, var(--color-prayer) 12%, var(--color-card));
-  font-weight: 600;
+  border-color: var(--color-fg);
+  background: var(--color-muted);
+  font-weight: 700;
 }
 
 /* ---- Imorgon (tomorrow preview) ---- */
@@ -1044,7 +1027,6 @@ svg {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: var(--space-4);
-  box-shadow: var(--shadow-card);
 }
 
 .tomorrow-tile-label {
@@ -1053,9 +1035,10 @@ svg {
 }
 
 .tomorrow-tile-value {
-  font-family: var(--font-heading);
-  font-size: 24px;
+  font-family: var(--font-mono);
+  font-size: 22px;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .tomorrow-gym-card {
@@ -1064,13 +1047,11 @@ svg {
   border-radius: var(--radius-sm);
   padding: var(--space-4);
   margin-bottom: var(--space-6);
-  box-shadow: var(--shadow-card);
 }
 
 .tomorrow-gym-label {
   font-weight: 600;
   margin: 0 0 var(--space-2);
-  color: var(--color-gym);
 }
 
 .tomorrow-exercise-list {
@@ -1162,7 +1143,6 @@ svg {
 .checklist-item.swipeable {
   padding: 0;
   border: none;
-  box-shadow: none;
   background: transparent;
   position: relative;
   overflow: hidden;
@@ -1199,7 +1179,6 @@ svg {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: var(--space-3) var(--space-4);
-  box-shadow: var(--shadow-card);
   touch-action: pan-y;
   transition: transform 220ms ease;
 }
@@ -1212,8 +1191,8 @@ svg {
 
 .card-progress {
   width: 100%;
-  height: 5px;
-  border-radius: 3px;
+  height: 4px;
+  border-radius: 2px;
   background: var(--color-muted);
   overflow: hidden;
   margin-top: auto;
@@ -1221,8 +1200,8 @@ svg {
 
 .card-progress-fill {
   height: 100%;
-  background: var(--accent);
-  border-radius: 3px;
+  background: var(--color-fg);
+  border-radius: 2px;
   transition: width 300ms ease;
 }
 
@@ -1245,21 +1224,6 @@ svg {
 @keyframes skeleton-shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
-}
-
-/* ---- Checkbox micro-interaction ---- */
-
-.checklist-label input[type="checkbox"] {
-  transition: transform 150ms ease;
-}
-
-.checklist-label input[type="checkbox"]:active {
-  transform: scale(0.85);
-}
-
-.log-set-btn.pop,
-.set-btn:active {
-  transform: scale(0.9);
 }
 
 @media (prefers-reduced-motion: reduce) {

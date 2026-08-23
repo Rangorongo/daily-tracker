@@ -2,9 +2,6 @@ import {
   todayISO, addDays, weekdayKeyForISODate, formatDisplayDate, WEEKDAY_LABELS_SV, vibrate,
 } from './util.js';
 import { scrollToPage } from './pager.js';
-import {
-  iconGym, iconPlugg, iconTodo, iconSleep, iconPrayer, iconTomorrow,
-} from './icons.js';
 import * as todo from './todo.js';
 import * as plugg from './plugg.js';
 import * as gym from './gym.js';
@@ -17,12 +14,12 @@ function tomorrowSummary() {
 }
 
 const CARDS = [
-  { page: 'gym', title: 'Gym', colorVar: '--color-gym', icon: iconGym, getSummary: gym.getSummary },
-  { page: 'plugg', title: 'Plugg', colorVar: '--color-plugg', icon: iconPlugg, getSummary: plugg.getSummary },
-  { page: 'todo', title: 'To-Do', colorVar: '--color-todo', icon: iconTodo, getSummary: todo.getSummary },
-  { page: 'sovtider', title: 'Sovtider', colorVar: '--color-sleep', icon: iconSleep, getSummary: sleep.getSummary },
-  { page: 'bontider', title: 'Böntider', colorVar: '--color-prayer', icon: iconPrayer, getSummary: prayer.getSummary },
-  { page: 'imorgon', title: 'Imorgon', colorVar: '--color-primary', icon: iconTomorrow, getSummary: tomorrowSummary },
+  { page: 'gym', title: 'Gym', getSummary: gym.getSummary },
+  { page: 'plugg', title: 'Plugg', getSummary: plugg.getSummary },
+  { page: 'todo', title: 'To-Do', getSummary: todo.getSummary },
+  { page: 'sovtider', title: 'Sovtider', getSummary: sleep.getSummary },
+  { page: 'bontider', title: 'Böntider', getSummary: prayer.getSummary },
+  { page: 'imorgon', title: 'Imorgon', getSummary: tomorrowSummary },
 ];
 
 export function mount(container) {
@@ -32,8 +29,7 @@ export function mount(container) {
       ? `<div class="card-progress"><div class="card-progress-fill" style="width:${Math.round(summary.fraction * 100)}%"></div></div>`
       : '';
     return `
-      <button type="button" class="dashboard-card" data-goto="${card.page}" style="--accent: var(${card.colorVar})">
-        <span class="card-icon">${card.icon}</span>
+      <button type="button" class="dashboard-card" data-goto="${card.page}">
         <h2>${card.title}</h2>
         <p>${summary.text}</p>
         ${bar}

@@ -146,7 +146,7 @@ function renderPluggPage() {
   const progress = totalSeconds > 0 ? 1 - remainingSeconds / totalSeconds : 0;
 
   container.innerHTML = `
-    <header class="section-header" style="--accent: var(--color-plugg)">
+    <header class="section-header">
       <button type="button" class="home-btn" aria-label="Till hem">${iconHome}</button>
       <div>
         <h1>Plugg</h1>

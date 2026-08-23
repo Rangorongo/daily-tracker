@@ -82,7 +82,7 @@ function render() {
   const target = getTarget();
 
   container.innerHTML = `
-    <header class="section-header" style="--accent: var(--color-sleep)">
+    <header class="section-header">
       <button type="button" class="home-btn" aria-label="Till hem">${iconHome}</button>
       <div>
         <h1>Sovtider</h1>

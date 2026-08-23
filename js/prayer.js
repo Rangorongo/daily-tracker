@@ -82,7 +82,7 @@ export async function prefetchTodayTimes() {
 export async function mount(container) {
   const today = todayISO();
   container.innerHTML = `
-    <header class="section-header" style="--accent: var(--color-prayer)">
+    <header class="section-header">
       <button type="button" class="home-btn" aria-label="Till hem">${iconHome}</button>
       <div>
         <h1>Böntider</h1>

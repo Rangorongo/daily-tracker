@@ -1,6 +1,8 @@
 // Small CSS-only confetti burst used to celebrate finishing a workout,
 // a Pomodoro session, or a fully-checked To-Do day. No external assets.
-const COLORS = ['#F97316', '#2563EB', '#16A34A', '#7C3AED', '#059669', '#EA580C'];
+// Monochrome by design (var(--color-fg)/var(--color-muted-fg) adapt to
+// light/dark mode automatically) to match the app's black-and-white look.
+const COLORS = ['var(--color-fg)', 'var(--color-muted-fg)'];
 const PARTICLE_COUNT = 16;
 
 export function celebrate() {

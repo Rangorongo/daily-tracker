@@ -32,7 +32,7 @@ function render() {
     .sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
 
   container.innerHTML = `
-    <header class="section-header" style="--accent: var(--color-primary)">
+    <header class="section-header">
       <button type="button" class="home-btn" aria-label="Till hem">${iconHome}</button>
       <div>
         <h1>Imorgon</h1>

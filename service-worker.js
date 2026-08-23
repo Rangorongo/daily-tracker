@@ -1,4 +1,4 @@
-const CACHE_NAME = 'daglig-tracker-v8';
+const CACHE_NAME = 'daglig-tracker-v9';
 
 const APP_SHELL = [
   './',

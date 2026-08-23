@@ -113,7 +113,7 @@ function render() {
   const otherItems = checklist.getItems().filter((i) => i.days && !i.days.includes(todayKey));
 
   container.innerHTML = `
-    <header class="section-header" style="--accent: var(--color-todo)">
+    <header class="section-header">
       <button type="button" class="home-btn" aria-label="Till hem">${iconHome}</button>
       <div>
         <h1>To-Do</h1>
