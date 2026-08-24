@@ -57,10 +57,17 @@ function ensureLogForDate(date) {
   }
   return log;
 }
-function logSet(date, exerciseId, weight) {
+function logSet(date, exerciseId, weight, reps) {
   const log = ensureLogForDate(date);
   if (!log.exerciseSets[exerciseId]) log.exerciseSets[exerciseId] = [];
-  log.exerciseSets[exerciseId].push({ weight });
+  log.exerciseSets[exerciseId].push({ weight, reps });
+  saveLogForDate(date, log);
+}
+
+function undoLastSet(date, exerciseId) {
+  const log = ensureLogForDate(date);
+  if (!log.exerciseSets[exerciseId] || log.exerciseSets[exerciseId].length === 0) return;
+  log.exerciseSets[exerciseId].pop();
   saveLogForDate(date, log);
 }
 
@@ -105,7 +112,8 @@ function getExerciseHistory(exerciseId, limit = 4) {
     if (date === today) continue;
     const sets = logs[date]?.exerciseSets?.[exerciseId];
     if (sets && sets.length > 0) {
-      history.push({ date, weight: sets[sets.length - 1].weight });
+      const last = sets[sets.length - 1];
+      history.push({ date, weight: last.weight, reps: last.reps });
       if (history.length >= limit) break;
     }
   }
@@ -177,21 +185,22 @@ function renderSession() {
 
   const history = getExerciseHistory(exercise.id, 4);
   const lastWeight = history[0]?.weight;
-  const defaultWeight = completedSets.length > 0
-    ? completedSets[completedSets.length - 1].weight
-    : (lastWeight ?? '');
+  const lastReps = history[0]?.reps;
+  const lastSetLogged = completedSets[completedSets.length - 1];
+  const defaultWeight = lastSetLogged ? lastSetLogged.weight : (lastWeight ?? '');
+  const defaultReps = lastSetLogged ? lastSetLogged.reps : (lastReps ?? '');
 
   let comparisonHtml = '';
-  if (completedSets.length > 0 && lastWeight != null) {
-    const diff = completedSets[completedSets.length - 1].weight - lastWeight;
+  if (lastSetLogged && lastWeight != null) {
+    const diff = lastSetLogged.weight - lastWeight;
     const arrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
-    comparisonHtml = `<p class="weight-compare ${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}">${arrow} ${diff > 0 ? '+' : ''}${diff}kg vs last time (${lastWeight}kg)</p>`;
+    comparisonHtml = `<p class="weight-compare ${diff > 0 ? 'up' : diff < 0 ? 'down' : ''}">${arrow} ${diff > 0 ? '+' : ''}${diff}kg vs last time (${lastWeight}kg${lastReps != null ? `×${lastReps}` : ''})</p>`;
   } else if (lastWeight != null) {
-    comparisonHtml = `<p class="weight-compare">Last time: ${lastWeight}kg</p>`;
+    comparisonHtml = `<p class="weight-compare">Last time: ${lastWeight}kg${lastReps != null ? `×${lastReps}` : ''}</p>`;
   }
 
   const trendHtml = history.length
-    ? `<p class="weight-trend">History: ${history.slice().reverse().map((h) => `${h.weight}kg`).join(' → ')}</p>`
+    ? `<p class="weight-trend">History: ${history.slice().reverse().map((h) => `${h.weight}kg${h.reps != null ? `×${h.reps}` : ''}`).join(' → ')}</p>`
     : '';
 
   const isLastSet = completedSets.length >= target;
@@ -207,6 +216,8 @@ function renderSession() {
       <label for="weight-input">Weight</label>
       <input type="number" id="weight-input" inputmode="decimal" step="0.5" min="0" value="${defaultWeight}" />
       <span>kg</span>
+      <label for="reps-input">Reps</label>
+      <input type="number" id="reps-input" inputmode="numeric" step="1" min="0" value="${defaultReps}" />
     </div>
     ${comparisonHtml}
     ${trendHtml}
@@ -216,6 +227,7 @@ function renderSession() {
         ${isLastSet ? 'Done ✓' : 'Log set'}
       </button>
     </div>
+    ${completedSets.length > 0 ? '<div class="undo-set-row"><button type="button" id="undo-set-btn" class="link-btn">Undo last set</button></div>' : ''}
 
     <div class="session-nav">
       <button type="button" id="prev-ex-btn" ${currentExerciseIndex === 0 ? 'disabled' : ''}>◀ Prev</button>
@@ -229,7 +241,8 @@ function renderSession() {
     logBtn.addEventListener('click', () => {
       vibrate(15);
       const weightVal = Number(body.querySelector('#weight-input').value) || 0;
-      logSet(today, exercise.id, weightVal);
+      const repsVal = body.querySelector('#reps-input').value === '' ? null : Number(body.querySelector('#reps-input').value);
+      logSet(today, exercise.id, weightVal, repsVal);
       const updated = getLogForDate(today).exerciseSets[exercise.id] || [];
       if (updated.length >= target && currentExerciseIndex < day.exercises.length - 1) {
         currentExerciseIndex += 1;
@@ -241,6 +254,16 @@ function renderSession() {
         celebrate();
       }
       wasPassDoneToday = nowAllDone;
+    });
+  }
+
+  const undoBtn = body.querySelector('#undo-set-btn');
+  if (undoBtn) {
+    undoBtn.addEventListener('click', () => {
+      vibrate(10);
+      undoLastSet(today, exercise.id);
+      wasPassDoneToday = false;
+      renderSession();
     });
   }
 

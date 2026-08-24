@@ -341,7 +341,7 @@ svg {
   gap: var(--space-2);
 }
 
-.add-item-form input {
+.add-item-form > input {
   flex: 1;
   min-height: 44px;
   padding: 0 var(--space-3);
@@ -411,7 +411,8 @@ svg {
 
 .add-item-form button,
 .sleep-form button,
-.add-exercise-form button {
+.add-exercise-form button,
+.block-edit-card button[type="submit"] {
   min-height: 44px;
   padding: 0 var(--space-4);
   border-radius: var(--radius-sm);
@@ -424,7 +425,8 @@ svg {
 
 .add-item-form button:active,
 .sleep-form button:active,
-.add-exercise-form button:active {
+.add-exercise-form button:active,
+.block-edit-card button[type="submit"]:active {
   transform: scale(0.97);
   opacity: 0.85;
 }
@@ -497,6 +499,7 @@ svg {
 .weight-input-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--space-2);
   margin-bottom: var(--space-2);
 }
@@ -507,7 +510,7 @@ svg {
 }
 
 .weight-input-row input {
-  width: 96px;
+  width: 84px;
   min-height: 48px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
@@ -517,6 +520,14 @@ svg {
   font-size: 20px;
   font-weight: 700;
   text-align: center;
+}
+
+.weight-input-row #reps-input {
+  width: 68px;
+}
+
+.undo-set-row {
+  margin: 0 0 var(--space-4);
 }
 
 .weight-compare {
@@ -818,6 +829,115 @@ svg {
   background: var(--color-card);
   color: var(--color-fg);
   padding: 0 var(--space-2);
+}
+
+/* ---- Study: block list + distribution ---- */
+
+.block-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.block-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  text-align: left;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+}
+
+.block-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.block-row-name {
+  font-weight: 600;
+}
+
+.block-row-value {
+  color: var(--color-muted-fg);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.distribution-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.distribution-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.distribution-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.distribution-top span:last-child {
+  color: var(--color-muted-fg);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.distribution-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-muted);
+  overflow: hidden;
+}
+
+.distribution-bar-fill {
+  height: 100%;
+  background: var(--color-fg);
+  border-radius: 3px;
+  transition: width 300ms ease;
+}
+
+/* Study settings: block editor cards */
+
+.block-edit-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.block-edit-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.block-name-input {
+  flex: 1;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-fg);
+  padding: 0 var(--space-3);
+  font-weight: 600;
 }
 
 /* ---- Study: progress + Pomodoro timer ---- */
